@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import itertools
-
+import random
 class Stack():
     def __init__(self):
         self.items = []
@@ -18,6 +18,11 @@ class Stack():
 class RegionGrowing():
     def __init__(self, img_path, threshold):
         self.image = cv2.imread(img_path, 1).astype('int')
+        if self.image is None:
+            raise ValueError(f'Cannot load image from the path: {img_path}')
+        self.image = self.image.astype('int')
+        self.threshold = threshold
+        self.segmented_image = None
         self.h, self.w, _ = self.image.shape
         self.passed_by = np.zeros((self.h, self.w), np.double)
         self.current_region = 0
@@ -62,10 +67,17 @@ class RegionGrowing():
         return np.linalg.norm(self.image[x0, y0] - self.image[x, y])
 
     def color_pixels(self):
+        colors = {}
         for i in range(self.h):
             for j in range(self.w):
                 val = self.passed_by[i][j]
-                self.segs[i][j] = (255, 255, 255) if (val == 0) else (val * 35, val * 90, val * 30)
+                if val == 0:
+                    self.segs[i][j] = (255, 255, 255)  # Nền trắng
+                else:
+                    # Gán màu ngẫu nhiên cho mỗi vùng mới
+                    if val not in colors:
+                        colors[val] = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                    self.segs[i][j] = colors[val]
 
     def get_segmented_image(self):
         return self.segs
