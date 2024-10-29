@@ -61,7 +61,8 @@ class App(tk.Tk):
                                                 text='Original Image',
                                                 font=('Arial', 14),
                                                 bg='#E7ECF0',
-                                                ).grid(row=6, column=0, padx=10, pady=20, sticky='n')
+                                                )
+        self.user_upload_image_label.grid(row=6, column=0, padx=10, pady=20, sticky='n')
         
         self.processed_image_label = tk.Label(self,
                                               text='Processed Image',
@@ -78,9 +79,12 @@ class App(tk.Tk):
             img = Image.open(self.image_path)
             img = img.resize((500, 450), Image.LANCZOS)
             self.original_image = ImageTk.PhotoImage(img)
-            self.user_upload_image_label = tk.Label(image=self.original_image, text='').grid(row=6, column=0, padx=10, pady=20, sticky='n')
+            self.user_upload_image_label = tk.Label(image=self.original_image, text='')
+            self.user_upload_image_label.grid(row=6, column=0, padx=10, pady=20, sticky='n')
         except Exception as e:
             messagebox.showerror('Error', f'Fail to open image. {str(e)}')
+        
+        self.image_to_matrix()
     
     def random_seeds(self):
         if not hasattr(self, 'image_path') or self.image_path is None:
@@ -128,6 +132,21 @@ class App(tk.Tk):
         processed_image = processed_image.resize((500, 450), Image.LANCZOS)
         self.after_using_algo = ImageTk.PhotoImage(processed_image)
         self.processed_image_label = tk.Label(image=self.after_using_algo, text='').grid(row=6, column=1, padx=10, pady=20, sticky='n')
+
+    def image_to_matrix(self):
+        if not hasattr(self, 'image_path') or self.image_path is None:
+            messagebox.showerror('Error', 'Please upload an image first')
+            return
+        
+        image = cv2.imread(self.image_path, cv2.IMREAD_GRAYSCALE)
+
+        if image is None:
+            messagebox.showerror('Error', 'Failed to load the image as a matrix')
+            return
+        
+        self.image_matrix = np.array(image)
+        print('Ma trận của bức ảnh là:')
+        print(self.image_matrix)
 if __name__ == "__main__":
     app = App()
     app.mainloop()
